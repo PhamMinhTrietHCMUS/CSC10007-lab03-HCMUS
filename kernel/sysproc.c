@@ -5,6 +5,7 @@
 #include "memlayout.h"
 #include "spinlock.h"
 #include "proc.h"
+#include "syscall.h"
 
 uint64
 sys_exit(void)
@@ -124,3 +125,53 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
+
+// pgaccess is here
+
+uint64 sys_pgaccess(void) // 1arg: starting VA, 2arg: number of pages, 3arg: userAddr
+{
+  uint64 starting_address;  
+  int num_page;
+  uint64 userAddress;
+
+  argaddr(0, &starting_address);
+  argint(1, &num_page);
+  argaddr(2, &userAddress);
+
+  // printf("arg0: %p\n", (void*)arg0);
+  // printf("arg1: %p\n", (void*)arg1);
+  // printf("arg2: %p\n", (void*)arg2);
+
+  // printf("number of page: %d\n", num_page);
+  // printf("VA: %ld\n", starting_address);  
+  // printf("UA: %ld\n", userAddress);
+
+  uint64 result = 0x0;
+  struct proc *p = myproc();
+  for(int i = 0; i < num_page && i < 64; i++) // capped at 64 because uint64 is only 64 bit, as such a bitmask of uint64 can only keep track of 64 pages
+  {
+      // printf("%d\n", i);
+      if(starting_address >= p->sz) // if the pointer to walk from is outside the range of the program's highest address space then get out
+        break;
+      
+      pte_t* tmp = walk(p->pagetable, starting_address, 0); // walk
+
+      if(!tmp)
+        break; // get out if theres no more PTE to see
+      else if(*tmp & PTE_A)
+      {
+        // printf("on page %d\n", i);
+        result |= (1L << i); // bitwise OR to add the page to the bitmask
+        *tmp &= ~PTE_A; // reset the access bit
+      }
+      
+      starting_address += 0x1000; // advance this one page ahead
+  }
+
+  if(copyout(p->pagetable, userAddress, (char*)&result, sizeof(result)) < 0)
+    return -1;
+  // use copyout
+  return 0;
+}
+
