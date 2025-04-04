@@ -59,3 +59,7 @@ int statistics(void*, int);
 // umalloc.c
 void* malloc(uint);
 void free(void*);
+
+
+// added content for pgaccess; this is here because someone decided to remove the damn test for pgaccess. FUCK YOU WHOEVER THAT WAS
+int pgaccess(uint64 *result, int page_count, uint64 *starting_ptr);
