@@ -20,13 +20,14 @@ int main(int argc, char** argv)
     if(argc != 3)
     {
         printf("Usage: pgatest <pages_to_check> <number_of_integers_to_spawn>\n" );
-        exit(0);
+        exit(-1);
     }
     
     int spawn_int_count = atoi(argv[2]);
     int pages_num = atoi(argv[1]);
     if(spawn_int_count <= 0 || pages_num <= 0){
         printf("invalid argument (cannot be negative)\n");
+        exit(-1);
     }
     
     uint64 DUMMY = 123456; // this is the dummy thing to start from
