@@ -1,6 +1,20 @@
 #include "kernel/types.h"
 #include "user/user.h"
 
+void print_as_bin(uint64 btms)
+{
+    uint64 firstmost = 0x8000000000000000;
+    for(int i = 0; i < 64; i++)
+    {
+        if(btms & firstmost)
+            printf("1");
+        else
+            printf("0");
+        btms <<= 1;
+    }
+    printf("\n");
+}
+
 int main(int argc, char** argv)
 {
     if(argc != 3)
@@ -21,9 +35,11 @@ int main(int argc, char** argv)
     for(int it = 0; it < spawn_int_count; it += 1)
         i[it] = 0;
     uint64 res;
-    if(pgaccess(&DUMMY, pages_num, &res) == 0)   
+    if(pgaccess(&DUMMY, pages_num, &res) == 0) {
         //printf("%p\n", (uint64*)res);
         printf("%ld\n", res);
+        print_as_bin(res);
+    }
     else
         printf("somethings wrong\n");
     free(i);
